@@ -1,0 +1,25 @@
+{
+  "_comment": "Deterministic link manifest for the Intel x Microsoft announcement email. slots = whole-element links keyed by the PSD's link_slot; regions = whole-element links keyed by region id (for elements without a slot, e.g. logos); inline = substring links inside text cells (footnote citations). The 4 citation URLs are the shipped human OFT's own; the CTA URL is a placeholder -- swap per campaign.",
+  "slots": {
+    "review-the-toolkit": "https://partner.microsoft.com/en-us/asset/collection/ai-pc-campaign"
+  },
+  "regions": {},
+  "inline": [
+    {
+      "match": "The Business Opportunity of AI",
+      "url": "https://news.microsoft.com/source/wp-content/uploads/2023/11/US51315823-IG-ADA.pdf"
+    },
+    {
+      "match": "The state of AI in 2023: Generative AI’s breakout year",
+      "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai-in-2023-generative-ais-breakout-year"
+    },
+    {
+      "match": "IDC FutureScape: Artificial Intelligence Will Reshape the IT Industry and the Way Businesses Operate",
+      "url": "https://www.idc.com/getdoc.jsp?containerId=prUS51335823"
+    },
+    {
+      "match": "Windows 10 EOS with Windows 11, Windows 365, and ESU",
+      "url": "https://techcommunity.microsoft.com/t5/windows-it-pro-blog/plan-for-windows-10-eos-with-windows-11-windows-365-and-esu/ba-p/4000414"
+    }
+  ]
+}

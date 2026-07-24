@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "psd-html"
+version = "0.1.0"
+description = "PSD -> classic-Outlook .OFT: deterministic, fail-loud, machine-gated email build pipeline."
+readme = "QUICKSTART.md"
+requires-python = ">=3.10"
+dependencies = [
+    "psd-tools==1.17.4",
+    # Pillow >= 12.3.0: earlier versions carry CVEs (WindowsViewer shell-injection PYSEC-2026-2257,
+    # decompression-bomb / heap-OOB issues) fixed in 12.3.0.
+    "Pillow>=12.3.0",
+    "numpy",
+    # Embeds the brand font into re-typeset headline SVGs (rasterizer.py). Guarded with a degraded
+    # fallback, but required for full-fidelity output.
+    "resvg-py",
+]
+
+[project.optional-dependencies]
+# Run the test suite (proof of coverage): pip install -e ".[test]" then python -m pytest
+test = [
+    "pytest>=7.0",
+]
+# Drag-and-drop GUI front end (gui/PsdDropper.pyw): pip install -e ".[gui]"
+gui = [
+    "tkinterdnd2",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Real-PSD / Adobe-COM / Playwright tests are skipif-gated on assets not shipped in this handoff,
+# so they skip cleanly; the synthetic-fixture suite runs anywhere.
+addopts = "-q"
+
+[project.scripts]
+psd-html = "psd_html.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

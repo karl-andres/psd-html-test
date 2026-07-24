@@ -1,0 +1,83 @@
+Metadata-Version: 2.4
+Name: psd-html
+Version: 0.1.0
+Summary: PSD -> classic-Outlook .OFT: deterministic, fail-loud, machine-gated email build pipeline.
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: psd-tools==1.17.4
+Requires-Dist: Pillow>=12.3.0
+Requires-Dist: numpy
+Requires-Dist: resvg-py
+Provides-Extra: test
+Requires-Dist: pytest>=7.0; extra == "test"
+Provides-Extra: gui
+Requires-Dist: tkinterdnd2; extra == "gui"
+
+# PSD-HTML — Quickstart
+
+Turns a designer's Photoshop email (`.psd`) into a classic-Outlook `.OFT` template, deterministically.
+
+## Requirements
+
+- **Python 3.10+** (tested on 3.13).
+- **Windows + classic Outlook** (desktop, logged in) — needed only for the `.OFT` conversion,
+  link-travel verify, capture, and send-verify. The HTML-emit half runs on any OS.
+- Python deps install automatically (below): `psd-tools`, `Pillow`, `numpy`, `resvg-py`.
+
+## Install
+
+```powershell
+cd handoff
+pip install -e .              # the tool + its runtime deps
+pip install -e ".[gui]"       # optional: also the drag-and-drop GUI
+```
+
+## Run — one command (PSD -> .OFT)
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File grammar\Invoke-PsdToOft.ps1 `
+    -Psd "path\to\design.psd" `
+    -OutDir out\my_email `
+    -LinkManifest grammar\links\<name>.links.json `
+    -Capture                                          # optional: classic-Outlook screenshot
+```
+
+Stages (each gated, non-zero exit on failure): emit Grammar-G HTML -> fidelity gate -> Grammar-G
+validation -> convert to `.oft` (Outlook COM, images embedded) -> link-travel verify -> capture.
+Output lands in `<OutDir>/`: `bundle/` (HTML), `email.oft` (the shippable template), `capture/`.
+
+## Run — GUI
+
+```powershell
+pythonw gui\PsdDropper.pyw       # drag a .psd onto the window; "Edit links..." to set URLs
+```
+
+## Run — lower-level CLI
+
+```powershell
+psd-html emit  <psd> -o out\bundle --links grammar\links\<name>.links.json   # HTML bundle only
+psd-html build <psd> -o tree.json                                            # inspect the IR
+psd-html --help                                                              # all subcommands
+```
+
+## Verify delivery (optional, sends real mail)
+
+```powershell
+# Sends the .oft to an address YOU control and confirms every link survived the wire HTML.
+powershell -File grammar\Invoke-OftSendVerify.ps1 -OftPath out\my_email\email.oft `
+    -To you@yourdomain.com -LinksReport out\my_email\bundle\links_report.json
+```
+
+## Link manifest
+
+Hyperlinks come from a `links.json` next to the PSD (or via the GUI's "Edit links..."). A PSD
+carries no link data, so this file is the single source of every URL. See
+`grammar/links/announcement.links.json` for the shape (`slots` / `regions` / `inline`).
+
+## Tests (coverage / due-diligence proof)
+
+```powershell
+pip install -e ".[test]"
+python -m pytest                 # synthetic-fixture suite runs anywhere; real-PSD pins skip
+                                 # when the proprietary reference corpus isn't present
+```

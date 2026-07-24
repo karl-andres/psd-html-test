@@ -1,0 +1,10 @@
+psd-tools==1.17.4
+Pillow>=12.3.0
+numpy
+resvg-py
+
+[gui]
+tkinterdnd2
+
+[test]
+pytest>=7.0
