@@ -12,6 +12,9 @@ Run locally:
 Endpoints:
     GET  /health           liveness check
     POST /validate         PSD in, SOP intake report out (no HTML produced)
+    POST /link-candidates  PSD in, starter links.json + discovered slot/region/inline
+                           candidates out (no URLs -- a PSD carries none; this only finds
+                           what needs one, for a UI to turn into a fill-in-the-URL form)
     POST /convert          PSD (+ optional links.json) in, zipped HTML bundle out
 """
 
@@ -32,6 +35,7 @@ from psd_html.config import ConfigError, load_config, resolve_density
 from psd_html.html_emitter import HtmlEmitterError, emit
 from psd_html.intake_validator import validate_psd
 from psd_html.layer_router import EditabilityViolation, route
+from psd_html.link_scaffold import build_starter_manifest
 from psd_html.psd_adapter import psd_to_layout_tree
 from psd_html.rasterizer import composite_psd
 from psd_html.table_solver import SafetyInvariantViolation, build_table_trees
@@ -68,6 +72,41 @@ async def validate(psd: UploadFile = File(...)) -> JSONResponse:
         report = validate_psd(str(psd_path))
         status_code = 200 if report["pass"] else 422
         return JSONResponse(report, status_code=status_code)
+    finally:
+        _cleanup(workdir)
+
+
+@app.post("/link-candidates")
+async def link_candidates(
+    psd: UploadFile = File(...),
+    policy: str = Form("hybrid"),
+    email: Optional[str] = Form(None),
+    email_index: int = Form(0),
+) -> JSONResponse:
+    """Discover every link_slot/region/inline-text a links.json for this PSD could bind, without
+    requiring anyone to already know the manifest schema. Runs the SAME routing+emit `/convert`
+    would, into a scratch dir (discarded after), so a candidate can never drift from what a real
+    convert would actually produce -- see `link_scaffold.py`'s module docstring.
+
+    Returns no URLs (a PSD carries none) -- a UI should render one input per candidate (mirroring
+    the desktop GUI's "Edit links..." form), then POST the filled-in {slots, regions, inline}
+    object to /convert as the `links` file, same shape build_starter_manifest's real (empty)
+    sections use.
+    """
+    if policy not in _POLICY_CHOICES:
+        raise HTTPException(400, f"policy must be one of {_POLICY_CHOICES}")
+
+    workdir = Path(tempfile.mkdtemp(prefix="psd_html_api_"))
+    try:
+        psd_path = workdir / (psd.filename or "upload.psd")
+        psd_path.write_bytes(await psd.read())
+        try:
+            manifest = build_starter_manifest(
+                psd_path, email_override=email, email_index=email_index, policy=policy
+            )
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+        return JSONResponse(manifest)
     finally:
         _cleanup(workdir)
 
