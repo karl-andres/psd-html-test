@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>psd-html API tester</title>
+</head>
+<body>
+
+<h1>psd-html API tester</h1>
+<p>No CSS, no build step -- just open this file in a browser. Talks straight to the deployed Render API.</p>
+
+<p>
+  API base URL:
+  <input type="text" id="baseUrl" size="50" value="https://psd-html-test.onrender.com">
+  <button onclick="checkHealth()">Check /health</button>
+  <span id="healthResult"></span>
+</p>
+
+<hr>
+
+<p>
+  PSD file: <input type="file" id="psdFile" accept=".psd"><br>
+  links.json (optional, for /conformance and /convert): <input type="file" id="linksFile" accept=".json"><br>
+  policy:
+  <select id="policy">
+    <option value="hybrid" selected>hybrid</option>
+    <option value="live">live</option>
+    <option value="raster">raster</option>
+  </select>
+  email_index: <input type="number" id="emailIndex" value="0" size="3" style="width:3em">
+</p>
+
+<p>
+  <button onclick="callJsonEndpoint('/validate', false)">Validate</button>
+  <button onclick="callJsonEndpoint('/link-candidates', false)">Link Candidates</button>
+  <button onclick="callJsonEndpoint('/conformance', true)">Conformance</button>
+  <button onclick="callConvert()">Convert (download zip)</button>
+</p>
+
+<p id="status"></p>
+
+<h2>Result</h2>
+<pre id="result" style="white-space: pre-wrap; border: 1px solid black; padding: 8px; min-height: 100px;"></pre>
+
+<script>
+function base() {
+  return document.getElementById('baseUrl').value.replace(/\/+$/, '');
+}
+
+function setStatus(msg) {
+  document.getElementById('status').textContent = msg;
+}
+
+function showResult(obj) {
+  document.getElementById('result').textContent =
+    typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2);
+}
+
+async function checkHealth() {
+  const el = document.getElementById('healthResult');
+  el.textContent = ' checking...';
+  try {
+    const res = await fetch(base() + '/health');
+    const body = await res.json();
+    el.textContent = ' ' + res.status + ' ' + JSON.stringify(body);
+  } catch (err) {
+    el.textContent = ' FAILED: ' + err;
+  }
+}
+
+function buildFormData(includeLinks) {
+  const psd = document.getElementById('psdFile').files[0];
+  if (!psd) {
+    throw new Error('Pick a .psd file first.');
+  }
+  const fd = new FormData();
+  fd.append('psd', psd);
+  fd.append('policy', document.getElementById('policy').value);
+  fd.append('email_index', document.getElementById('emailIndex').value || '0');
+  if (includeLinks) {
+    const links = document.getElementById('linksFile').files[0];
+    if (links) {
+      fd.append('links', links);
+    }
+  }
+  return fd;
+}
+
+async function callJsonEndpoint(path, includeLinks) {
+  setStatus('');
+  showResult('working... (a full convert-style call can take ~20s)');
+  try {
+    const fd = buildFormData(includeLinks);
+    const res = await fetch(base() + path, { method: 'POST', body: fd });
+    const body = await res.json();
+    setStatus(path + ' -> HTTP ' + res.status);
+    showResult(body);
+  } catch (err) {
+    setStatus(path + ' -> FAILED');
+    showResult(String(err));
+  }
+}
+
+async function callConvert() {
+  setStatus('');
+  showResult('working... (usually ~20s)');
+  try {
+    const fd = buildFormData(true);
+    const res = await fetch(base() + '/convert', { method: 'POST', body: fd });
+    if (!res.ok) {
+      const errBody = await res.text();
+      setStatus('/convert -> HTTP ' + res.status);
+      showResult(errBody);
+      return;
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'bundle.zip';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    setStatus('/convert -> HTTP ' + res.status + ' -- bundle.zip downloaded');
+    showResult('Done. bundle.zip should be in your downloads.');
+  } catch (err) {
+    setStatus('/convert -> FAILED');
+    showResult(String(err));
+  }
+}
+</script>
+
+</body>
+</html>

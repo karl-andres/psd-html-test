@@ -32,6 +32,7 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.background import BackgroundTask
 
@@ -53,6 +54,16 @@ app = FastAPI(
         "Outlook on Windows."
     ),
     version="0.1.0",
+)
+
+# Wide open on purpose, matching this API's existing no-auth posture (see module docstring) --
+# this is meant to be callable from a plain static HTML tester (index.html) opened as a local
+# file (Origin: null) or hosted anywhere, not just one known frontend origin.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 _POLICY_CHOICES = ("live", "hybrid", "raster")
