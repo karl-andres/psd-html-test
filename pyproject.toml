@@ -17,6 +17,7 @@ dependencies = [
     # Embeds the brand font into re-typeset headline SVGs (rasterizer.py). Guarded with a degraded
     # fallback, but required for full-fidelity output.
     "resvg-py",
+    "fastapi>=0.139.2",
 ]
 
 [project.optional-dependencies]

@@ -8,6 +8,7 @@ Requires-Dist: psd-tools==1.17.4
 Requires-Dist: Pillow>=12.3.0
 Requires-Dist: numpy
 Requires-Dist: resvg-py
+Requires-Dist: fastapi>=0.139.2
 Provides-Extra: test
 Requires-Dist: pytest>=7.0; extra == "test"
 Provides-Extra: gui
@@ -16,6 +17,8 @@ Requires-Dist: tkinterdnd2; extra == "gui"
 # PSD-HTML — Quickstart
 
 Turns a designer's Photoshop email (`.psd`) into a classic-Outlook `.OFT` template, deterministically.
+
+**Start here:** [`docs/TOOL_BRIEFING.md`](docs/TOOL_BRIEFING.md) — what the tool is and who it's for, the workflow, inputs/outputs/clients, how it covers the reported bug list, the QA + security posture, and what's built vs. on the roadmap. The authoring SOP is [`docs/PSD-for-HTML_Authoring-SOP.md`](docs/PSD-for-HTML_Authoring-SOP.md).
 
 ## Requirements
 
@@ -30,6 +33,13 @@ Turns a designer's Photoshop email (`.psd`) into a classic-Outlook `.OFT` templa
 cd handoff
 pip install -e .              # the tool + its runtime deps
 pip install -e ".[gui]"       # optional: also the drag-and-drop GUI
+```
+
+For a pinned, reproducible environment, install the locked set first:
+
+```powershell
+pip install -r requirements.lock
+pip install -e . --no-deps
 ```
 
 ## Run — one command (PSD -> .OFT)

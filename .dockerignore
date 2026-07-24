@@ -1,0 +1,23 @@
+.git
+.cursor
+.github
+build
+dist
+*.egg-info
+__pycache__
+**/__pycache__
+*.pyc
+tests
+gui
+grammar
+docs
+Example PSD
+DEMO.mp4
+QUICKSTART.md
+*.md
+psd_html.config.example.json
+.venv
+venv
+.pytest_cache
+.mypy_cache
+.ruff_cache

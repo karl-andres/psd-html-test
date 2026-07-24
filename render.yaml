@@ -1,0 +1,16 @@
+# Render Blueprint for the psd-html API (the HTML-emit leg only -- see api/main.py and Dockerfile
+# for what this does and does not do; the .OFT/Outlook-COM leg needs Windows and is not deployed
+# here). Connect this repo in the Render dashboard as a Blueprint, or run `render blueprint launch`.
+#
+# Render injects PORT automatically for web services (default 10000); the Dockerfile's CMD binds
+# to it, so no PORT env var needs to be declared here.
+services:
+  - type: web
+    name: psd-html-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    region: oregon
+    healthCheckPath: /health
+    autoDeployTrigger: commit

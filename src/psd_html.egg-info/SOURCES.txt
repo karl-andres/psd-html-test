@@ -19,6 +19,7 @@ src/psd_html/oracle.py
 src/psd_html/preview.py
 src/psd_html/psd_adapter.py
 src/psd_html/rasterizer.py
+src/psd_html/run_report.py
 src/psd_html/table_solver.py
 src/psd_html/table_tree.py
 src/psd_html/text_raster_adapter.py
@@ -50,6 +51,7 @@ tests/test_oracle.py
 tests/test_preview.py
 tests/test_psd_adapter.py
 tests/test_rasterizer.py
+tests/test_run_report.py
 tests/test_s2_hardening.py
 tests/test_table_solver.py
 tests/test_table_tree.py

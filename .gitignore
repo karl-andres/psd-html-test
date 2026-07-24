@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+
+# Local test artifacts from exercising api/main.py's /convert endpoint by hand -- not repo content.
+bundle.zip
+bundle_out/

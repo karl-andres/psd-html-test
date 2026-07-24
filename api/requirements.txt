@@ -1,0 +1,5 @@
+# API-only extras layered on top of the base package's requirements.lock (installed separately
+# in the Dockerfile). python-multipart is required by FastAPI/Starlette for File()/Form() uploads.
+fastapi==0.139.2
+uvicorn[standard]==0.51.0
+python-multipart==0.0.32

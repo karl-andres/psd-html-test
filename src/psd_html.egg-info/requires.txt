@@ -2,6 +2,7 @@ psd-tools==1.17.4
 Pillow>=12.3.0
 numpy
 resvg-py
+fastapi>=0.139.2
 
 [gui]
 tkinterdnd2
